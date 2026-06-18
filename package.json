@@ -1,0 +1,24 @@
+{
+  "name": "chatapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gateway": "npm run dev --prefix services/api-gateway",
+    "auth": "npm run dev --prefix services/auth-service",
+    "web": "npm run dev --prefix app/web",
+    "dev": "concurrently -n gateway,auth -c blue,green \"npm run gateway\" \"npm run auth\" \"npm run web\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.1",
+    "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

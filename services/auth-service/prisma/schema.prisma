@@ -1,0 +1,52 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+
+}
+
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  lastName    String?
+  firstName   String?
+  mobile      String?
+  token       String?    @db.LongText
+  role        UserRole   @default(USER)
+  is_phone_verified Boolean  @default(false)
+  is_email_verified Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  otps              Otp[]    
+
+
+  @@map("users")
+}
+
+model Otp {
+  id        String   @id @default(uuid())
+  email     String
+  otp       String
+  createdAt DateTime @default(now())
+  verified  Boolean
+  expiresAt DateTime
+  userId    String?
+  user      User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+  @@map("otps")
+}
+
