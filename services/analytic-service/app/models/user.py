@@ -10,7 +10,7 @@ class User(Base):
     This service only reads from it for analytics.
     """
 
-    __tablename__ = "users"
+    __tablename__ = "auth-user"
 
     id = Column(String(36), primary_key=True)
     email = Column(String(255), unique=True, nullable=False)
