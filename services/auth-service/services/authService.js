@@ -153,3 +153,18 @@ export const loginService = async (email, password) => {
 
     return { user, token }
 }
+
+export const getMeService= async(userId)=>{
+    if(!userId){
+        throw new Error(ERROR_MESSAGES.USER_NOT_FOUND)
+    }
+    const user =await prisma.user.findUnique({
+        where:{
+            id: userId,
+        }
+    })
+    if(!user){
+        throw new Error(ERROR_MESSAGES.USER_NOT_FOUND)
+    }
+    return user;
+}

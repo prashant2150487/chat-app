@@ -49,3 +49,14 @@ export const login = async (req, res, next) => {
     }
 }
 
+export const getMe= async(req,res,next)=>{
+    try{
+        const {id,email,role}=req.user;
+        const users=await getAllUsersService(id)
+
+    }catch(err){
+        console.error("errr", err);
+        next(err)
+    }
+}
+

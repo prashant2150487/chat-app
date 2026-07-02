@@ -5,6 +5,6 @@ import { SERVICES } from "../config/service";
 
 
 export const userProxy = createProxyMiddleware({
-  target: SERVICES.USER,
+  target: `${SERVICES.USER}/api/v1/users`,
   changeOrigin: true,
 });

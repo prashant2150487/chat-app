@@ -1,14 +1,37 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { getDemoUserService } from "../services/userService.js";
 import { HTTP_STATUS } from "../constants/httpStatus.js";
+import { getAllUsersService } from "../services/userService.js";
 
-export const getDemoUser = asyncHandler(async (req, res) => {
-    const { id } = req.params;
 
-    const user = await getDemoUserService(id);
 
-    return res.status(HTTP_STATUS.OK).json({
-        success: true,
-        data: user,
-    });
-});
+export const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await getAllUsersService()
+        res.status(HTTP_STATUS.OK).json({
+            success: true,
+            data: users,
+        })
+
+    } catch (err) {
+        console.error("errr", err);
+        next(err)
+    }
+}
+export const getUserById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const user = await getUserById(id)
+        return res.status(HTTP_STATUS.OK).json({
+            success: true,
+            data: user,
+        })
+
+    } catch (err) {
+        console.error("errr", err);
+        next(err)
+
+    }
+}
+
+
+
