@@ -3,37 +3,37 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String    @id @default(uuid()) @db.Uuid
+  id          String    @id @default(uuid())
   username    String    @unique @db.VarChar(50)
   displayName String    @map("display_name") @db.VarChar(100)
   bio         String?   @db.Text
   avatarUrl   String?   @map("avatar_url") @db.Text
   phone       String?   @db.VarChar(20)
   isOnline    Boolean   @default(false) @map("is_online")
-  lastSeenAt  DateTime? @map("last_seen_at") @db.Timestamptz(6)
+  lastSeenAt  DateTime? @map("last_seen_at")
   statusMsg   String?   @map("status_msg") @db.VarChar(200)
-  privacy     Json      @default("{\"last_seen\":\"contacts\",\"profile_photo\":\"everyone\"}") @db.JsonB
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  privacy     Json      @default("{\"last_seen\":\"contacts\",\"profile_photo\":\"everyone\"}")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  contacts    Contact[]     @relation("ContactOwner")
-  contactOf   Contact[]     @relation("ContactTarget")
-  blocking    BlockedUser[] @relation("Blocker")
-  blockedBy   BlockedUser[] @relation("Blocked")
+  contacts  Contact[]     @relation("ContactOwner")
+  contactOf Contact[]     @relation("ContactTarget")
+  blocking  BlockedUser[] @relation("Blocker")
+  blockedBy BlockedUser[] @relation("Blocked")
 
   @@map("users")
 }
 
 model Contact {
-  id        String   @id @default(uuid()) @db.Uuid
-  ownerId   String   @map("owner_id") @db.Uuid
-  contactId String   @map("contact_id") @db.Uuid
+  id        String   @id @default(uuid())
+  ownerId   String   @map("owner_id")
+  contactId String   @map("contact_id")
   nickname  String?  @db.VarChar(100)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at")
 
   owner   User @relation("ContactOwner", fields: [ownerId], references: [id])
   contact User @relation("ContactTarget", fields: [contactId], references: [id])
@@ -43,9 +43,9 @@ model Contact {
 }
 
 model BlockedUser {
-  blockerId String   @map("blocker_id") @db.Uuid
-  blockedId String   @map("blocked_id") @db.Uuid
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  blockerId String   @map("blocker_id")
+  blockedId String   @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
 
   blocker User @relation("Blocker", fields: [blockerId], references: [id])
   blocked User @relation("Blocked", fields: [blockedId], references: [id])

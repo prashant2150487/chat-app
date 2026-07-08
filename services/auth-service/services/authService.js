@@ -6,7 +6,7 @@ import { ERROR_MESSAGES } from "../constants/errorMessage.js";
 import { HTTP_STATUS } from "../constants/httpStatus.js";
 import { generateOTP } from "../utils/helper.js";
 import { otpTemplate } from "../template/otpTemplate.js";
-import { generateToken } from "../utils/jwt.js";
+import { generateToken, generateRefreshToken } from "../utils/jwt.js";
 
 export const registerUser = async (userPayload) => {
     const { email, password, firstName, lastName, mobile } = userPayload;
@@ -121,7 +121,7 @@ export const verifyOtpService = async (email, otp) => {
 
 export const loginService = async (email, password) => {
     if (!email || !password) {
-        throw new AppError("Email and password are required", 400)
+        throw new AppError("Email and password are required", HTTP_STATUS.BAD_REQUEST)
     }
     const user = await prisma.user.findUnique({
         where: {
@@ -129,29 +129,27 @@ export const loginService = async (email, password) => {
         }
     })
     if (!user) {
-        throw new AppError("User not found", 404)
+        throw new AppError("User not found", HTTP_STATUS.NOT_FOUND)
     }
     const isPasswordValid = await comparePassword(password, user.password)
     if (!isPasswordValid) {
-        throw new AppError("Invalid password", 400)
+        throw new AppError("Invalid password", HTTP_STATUS.UNAUTHORIZED)
     }
-    const token = generateToken({email:user.email, id:user.id, role:user.role});
+    const tokenPayload = { email: user.email, id: user.id, role: user.role };
+    const token = generateToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+
     await prisma.user.update({
         where: {
             id: user.id,
 
-        },
+        },  
         data: {
-            token: token
+            token: token,
+            refreshToken: refreshToken
         }
-
     })
-
-
-
-
-
-    return { user, token }
+    return { user, token, refreshToken }
 }
 
 export const getMeService= async(userId)=>{

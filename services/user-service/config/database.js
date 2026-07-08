@@ -7,9 +7,7 @@ export const connectDB = async () => {
         await prisma.$connect();
         console.log("Database connected successfully");
     } catch (error) {
-        // Don't crash the service if the DB isn't provisioned yet; the
-        // scaffold/demo endpoints should still boot. Swap to process.exit(1)
-        // once Postgres is required.
+        // Don't crash the service if the DB isn't provisioned yet.
         console.warn("Database connection failed (continuing):", error.message);
     }
 };

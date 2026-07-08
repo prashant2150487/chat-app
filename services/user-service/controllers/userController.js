@@ -4,6 +4,7 @@ import { getAllUsersService } from "../services/userService.js";
 
 
 
+// fetch all users
 export const getAllUsers = async (req, res, next) => {
     try {
         const users = await getAllUsersService()
@@ -17,6 +18,7 @@ export const getAllUsers = async (req, res, next) => {
         next(err)
     }
 }
+// fetch public details
 export const getUserById = async (req, res, next) => {
     try {
         const { id } = req.params;

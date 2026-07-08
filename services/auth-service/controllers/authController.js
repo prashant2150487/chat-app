@@ -33,14 +33,13 @@ export const verifyOtp = async (req, res, next) => {
 export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body
-        const { token, user } = await loginService(email, password)
+        const { token, refreshToken, user } = await loginService(email, password)
         return res.status(200).json({
             success: true,
             message: "Login sucessfully",
             token,
+            refreshToken,
             user
-
-
         })
 
     } catch (err) {

@@ -22,6 +22,7 @@ model User {
   password    String
   mobile      String?
   token       String?    @db.LongText
+  refreshToken String?  @db.LongText
   role        UserRole   @default(USER)
   is_phone_verified Boolean  @default(false)
   is_email_verified Boolean  @default(false)
