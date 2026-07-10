@@ -1,4 +1,4 @@
-import { loginService, registerUser, verifyOtpService } from "../services/authService.js";
+import { getMeService, loginService, registerUser, verifyOtpService } from "../services/authService.js";
 
 export const register = async (req, res, next) => {
     try {
@@ -48,14 +48,17 @@ export const login = async (req, res, next) => {
     }
 }
 
-export const getMe= async(req,res,next)=>{
-    try{
-        const {id,email,role}=req.user;
-        const users=await getAllUsersService(id)
-
-    }catch(err){
+export const getMe = async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        const user = await getMeService(id);
+        return res.status(200).json({
+            success: true,
+            data: user,
+        });
+    } catch (err) {
         console.error("errr", err);
-        next(err)
+        next(err);
     }
-}
+};
 

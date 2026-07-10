@@ -6,6 +6,8 @@ export const ERROR_MESSAGES = {
     CONTACT_ALREADY_EXISTS: "Contact already exists",
     CANNOT_BLOCK_SELF: "You cannot block yourself",
     UNAUTHORIZED: "Unauthorized access",
+    INVALID_TOKEN: "Invalid token",
+    TOKEN_EXPIRED: "Token expired",
     FORBIDDEN: "Access denied",
     ROUTE_NOT_FOUND: "Route not found",
     VALIDATION_FAILED: "Validation failed",

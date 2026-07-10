@@ -17,20 +17,21 @@ enum UserRole {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  email       String   @unique
-  password    String
-  mobile      String?
-  token       String?    @db.LongText
-  refreshToken String?  @db.LongText
-  role        UserRole   @default(USER)
-  is_phone_verified Boolean  @default(false)
-  is_email_verified Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  mobile            String?
+  token             String?   @db.LongText
+  refreshToken      String?   @db.LongText
+  role              UserRole  @default(USER)
+  is_phone_verified Boolean   @default(false)
+  is_email_verified Boolean   @default(false)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
-  otps              Otp[]    
-
+  otps Otp[]
 
   @@map("auth-user")
 }
