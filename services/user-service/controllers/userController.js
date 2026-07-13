@@ -32,6 +32,14 @@ export const getMe = async (req, res, next) => {
     next(err);
   }
 };
+export const updateMe = async ( rew ,res, next) => {
+  try{
+    const { id} = res.user;
+    
+
+  }catch(err){
+    next(err)
+  }
 
 export const getUserById = async (req, res, next) => {
   try {
