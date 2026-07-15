@@ -57,6 +57,28 @@ export const userService = {
       select: profileSelect,
     });
   },
+  updateProfile: async ({ id, displayName, bio, statusMsg, avatarUrl }) => {
+    if (!id) {
+      throw new AppError("User id is required", HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    const data = {};
+    if (displayName !== undefined) data.displayName = displayName;
+    if (bio !== undefined) data.bio = bio;
+    if (statusMsg !== undefined) data.statusMsg = statusMsg;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+
+    return prisma.user.update({
+      where: { id },
+      data,
+      select: profileSelect,
+    });
+  },
 
   userDetails: async (userId) => {
     if (!userId) {
@@ -74,15 +96,32 @@ export const userService = {
 
     return user;
   },
-
-  getUserById: async (userId) => {
-    return userService.userDetails(userId);
+  getUserById: async (id) => {
+    if (!id) {
+      throw new AppError("User id is required", HTTP_STATUS.BAD_REQUEST);
+    }
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: profileSelect,
+    });
+    if (!user) {
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+    return user;
   },
 
-  listUsers: async () => {
-    return prisma.user.findMany({
+  getUserByUserName: async (username) => {
+    if (!username) {
+      throw new AppError("Username is required", HTTP_STATUS.BAD_REQUEST);
+    }
+    const user = await prisma.user.findUnique({
+      where: { username },
       select: profileSelect,
-      orderBy: { createdAt: "desc" },
     });
+    if (!user) {
+      throw new AppError(ERROR_MESSAGES.USER_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+    return user;
   },
 };
+
