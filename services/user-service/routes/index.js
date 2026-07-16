@@ -2,6 +2,7 @@ import { Router } from "express";
 import userRouter from "./userRoutes.js";
 import { requireInternalSecret } from "../middlewares/internalAuth.js";
 import { createProfile } from "../controllers/userController.js";
+import contactRouter from "./contactRoutes.js";
 
 const router = Router();
 
@@ -17,5 +18,5 @@ router.get("/health", (req, res) => {
 router.post("/internal/users", requireInternalSecret, createProfile);
 
 router.use("/users", userRouter);
-
+router.use("/contacts", contactRouter);
 export default router;
