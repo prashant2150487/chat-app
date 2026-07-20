@@ -4,6 +4,7 @@ export const ERROR_MESSAGES = {
     USER_ALREADY_EXISTS: "User already exists",
     USERNAME_ALREADY_EXISTS: "Username already exists",
     CONTACT_ALREADY_EXISTS: "Contact already exists",
+    CONTACT_NOT_FOUND: "Contact not found",
     CANNOT_ADD_SELF: "You cannot add yourself as a contact",
     CANNOT_BLOCK_SELF: "You cannot block yourself",
     UNAUTHORIZED: "Unauthorized access",

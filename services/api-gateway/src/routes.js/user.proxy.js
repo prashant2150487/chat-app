@@ -18,5 +18,14 @@ export const userProxy = createProxyMiddleware({
       }
       fixRequestBody(proxyReq, req);
     },
+    // Gateway already sets CORS — drop upstream CORS headers to avoid conflicts
+    proxyRes: (proxyRes) => {
+      const headers = proxyRes.headers;
+      delete headers["access-control-allow-origin"];
+      delete headers["access-control-allow-credentials"];
+      delete headers["access-control-allow-methods"];
+      delete headers["access-control-allow-headers"];
+      delete headers["access-control-expose-headers"];
+    },
   },
 });

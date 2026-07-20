@@ -11,6 +11,7 @@ export const getContacts = async (req, res, next) => {
     return res.status(HTTP_STATUS.OK).json({
       success: true,
       data: contacts,
+      message: "Contacts fetched successfully",
     })
 
   } catch (err) {
@@ -35,6 +36,7 @@ export const createContactByPhone = async (req, res, next) => {
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: newContact,
+      message: "Contact created successfully",
     });
   } catch (err) {
     next(err);
@@ -58,8 +60,26 @@ export const createContactByUserName = async (req, res, next) => {
     return res.status(HTTP_STATUS.CREATED).json({
       success: true,
       data: newContact,
+      message: "Contact created successfully",
     });
   } catch (err) {
     next(err);
   }
 };
+
+
+export const deleteContact = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const OwnerId = req.user.id;
+    const contct = await contactService.deleteContact(id, OwnerId);
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      data: contct,
+      message: "Contact deleted successfully",
+    })
+  } catch (err) {
+    next(err)
+  }
+}
+

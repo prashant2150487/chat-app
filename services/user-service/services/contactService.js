@@ -2,7 +2,6 @@ import { prisma } from "../config/database.js";
 import { AppError } from "../utils/appError.js";
 import { HTTP_STATUS } from "../constants/httpStatus.js";
 import { ERROR_MESSAGES } from "../constants/errorMessage.js";
-import { getContacts } from "../controllers/contactController.js";
 
 const contactSelect = {
   id: true,
@@ -46,6 +45,24 @@ export const contactService = {
       where: {ownerId},
       select: contactSelect
     })
+  },
+  deleteContact: async (id, ownerId) => {
+    if (!id) {
+      throw new AppError("Contact id is required", HTTP_STATUS.BAD_REQUEST);
+    }
+    if (!ownerId) {
+      throw new AppError("Owner id is required", HTTP_STATUS.BAD_REQUEST);
+    }
+
+    const contact = await prisma.contact.findUnique({ where: { id } });
+    if (!contact || contact.ownerId !== ownerId) {
+      throw new AppError(ERROR_MESSAGES.CONTACT_NOT_FOUND, HTTP_STATUS.NOT_FOUND);
+    }
+
+    return prisma.contact.delete({
+      where: { id },
+      select: contactSelect,
+    });
   },
   createContactByPhone: async (phone, ownerId, nickname) => {
     if (!phone) {

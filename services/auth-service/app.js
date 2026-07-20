@@ -11,11 +11,19 @@ import { errorHandler } from "./middlewares/errorMiddleware.js";
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-    origin: "http://localhost:3000",
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
     credentials: true,
-}));
-app.use(helmet());
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 app.use(morgan("dev"));
 
 

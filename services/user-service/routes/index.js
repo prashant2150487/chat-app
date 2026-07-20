@@ -3,6 +3,7 @@ import userRouter from "./userRoutes.js";
 import { requireInternalSecret } from "../middlewares/internalAuth.js";
 import { createProfile } from "../controllers/userController.js";
 import contactRouter from "./contactRoutes.js";
+import blockUserRouter from "./blockUserRoutes.js";
 
 const router = Router();
 
@@ -19,4 +20,6 @@ router.post("/internal/users", requireInternalSecret, createProfile);
 
 router.use("/users", userRouter);
 router.use("/contacts", contactRouter);
+router.use("/blocks", blockUserRouter);
+
 export default router;
