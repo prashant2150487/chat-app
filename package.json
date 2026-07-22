@@ -8,8 +8,9 @@
     "gateway": "npm run dev --prefix services/api-gateway",
     "auth": "npm run dev --prefix services/auth-service",
     "user": "npm run dev --prefix services/user-service",
+    "chat": "npm run dev --prefix services/chat-service",
     "web": "npm run dev --prefix app/web",
     "desktop": "npm run dev --prefix app/desktop",
-    "dev": "concurrently -n gateway,auth,web,user -c blue,green,yellow,magenta \"npm run gateway\" \"npm run auth\" \"npm run web\" \"npm run user\""
+    "dev": "concurrently -n gateway,auth,web,user,chat -c blue,green,yellow,magenta,cyan \"npm run gateway\" \"npm run auth\" \"npm run web\" \"npm run user\" \"npm run chat\""
   }
 }

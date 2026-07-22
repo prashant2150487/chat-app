@@ -20,3 +20,30 @@ Device tracking
 OAuth
 MFA
 RBAC
+Auth Service
+│
+├── Register User
+├── Login
+├── JWT
+└── Refresh Token
+
+User Service
+│
+├── Profile
+├── Contacts
+├── Presence
+├── Last Seen
+├── Privacy
+└── Block Users
+
+Chat Service
+│
+├── Direct Chats
+├── Groups
+└── Participants
+
+Message Service
+│
+├── Messages
+├── Reactions
+└── Read Receipts
