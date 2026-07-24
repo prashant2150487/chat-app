@@ -57,7 +57,7 @@ export const userService = {
       select: profileSelect,
     });
   },
-  updateProfile: async ({ id, displayName, bio, statusMsg, avatarUrl }) => {
+  updateProfile: async ({ id, displayName, bio, statusMsg, avatarUrl, phone, privacy }) => {
     if (!id) {
       throw new AppError("User id is required", HTTP_STATUS.BAD_REQUEST);
     }
@@ -68,10 +68,31 @@ export const userService = {
     }
 
     const data = {};
-    if (displayName !== undefined) data.displayName = displayName;
-    if (bio !== undefined) data.bio = bio;
-    if (statusMsg !== undefined) data.statusMsg = statusMsg;
-    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl;
+    if (displayName !== undefined) {
+      if (!displayName?.trim()) {
+        throw new AppError("Display name is required", HTTP_STATUS.BAD_REQUEST);
+      }
+      data.displayName = displayName.trim();
+    }
+    if (bio !== undefined) data.bio = bio?.trim() || null;
+    if (statusMsg !== undefined) data.statusMsg = statusMsg?.trim() || null;
+    if (avatarUrl !== undefined) data.avatarUrl = avatarUrl?.trim() || null;
+    if (phone !== undefined) data.phone = phone?.trim() || null;
+    if (privacy !== undefined) {
+      const allowedLastSeen = ["everyone", "contacts", "nobody"];
+      const allowedProfilePhoto = ["everyone", "contacts", "nobody"];
+
+      if (
+        typeof privacy !== "object" ||
+        privacy === null ||
+        !allowedLastSeen.includes(privacy.last_seen) ||
+        !allowedProfilePhoto.includes(privacy.profile_photo)
+      ) {
+        throw new AppError(ERROR_MESSAGES.VALIDATION_FAILED, HTTP_STATUS.BAD_REQUEST);
+      }
+
+      data.privacy = privacy;
+    }
 
     return prisma.user.update({
       where: { id },

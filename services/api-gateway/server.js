@@ -1,8 +1,13 @@
 import "dotenv/config";
+import http from "http";
 import app from "./app.js";
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 API Gateway Started on port ${PORT}`);
+const server = http.createServer(app);
+
+server.listen(PORT, () => {
+  console.log(`API Gateway started on port ${PORT}`);
 });
+
+export default server;

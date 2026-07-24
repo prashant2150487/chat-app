@@ -35,16 +35,22 @@ export const getMe = async (req, res, next) => {
 export const updateMe = async (req, res, next) => {
   try {
     const { id } = req.user;
-    const { displayName, bio, statusMsg, avatarUrl } = req.body;
-    const user = await userService.updateProfile({ id, displayName, bio, statusMsg, avatarUrl });
+    const { displayName, bio, statusMsg, avatarUrl, phone, privacy } = req.body;
+    const user = await userService.updateProfile({
+      id,
+      displayName,
+      bio,
+      statusMsg,
+      avatarUrl,
+      phone,
+      privacy,
+    });
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      data: user
-    })
-
-
+      data: user,
+    });
   } catch (err) {
-    next(err)
+    next(err);
   }
 };
 export const getUserById = async (req, res, next) => {
