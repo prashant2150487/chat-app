@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+model AuthUser {
+  id                String   @id @default(uuid())
+  email             String   @unique
+  password          String
+  firstName         String?
+  lastName          String?
+  mobile            String?
+  token             String?  @db.LongText
+  refreshToken      String?  @db.LongText
+  role              UserRole @default(USER)
+  is_phone_verified Boolean  @default(false)
+  is_email_verified Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  otps Otp[]
+
+  @@map("auth-user")
+}
+
+model Otp {
+  id        String    @id @default(uuid())
+  email     String
+  otp       String
+  createdAt DateTime  @default(now())
+  verified  Boolean
+  expiresAt DateTime
+  userId    String?
+  user      AuthUser? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("otps")
+}
+
+model User {
+  id          String    @id
+  username    String    @unique @db.VarChar(50)
+  displayName String    @map("display_name") @db.VarChar(100)
+  bio         String?   @db.Text
+  avatarUrl   String?   @map("avatar_url") @db.Text
+  phone       String?   @db.VarChar(20)
+  isOnline    Boolean   @default(false) @map("is_online")
+  lastSeenAt  DateTime? @map("last_seen_at")
+  statusMsg   String?   @map("status_msg") @db.VarChar(200)
+  privacy     Json      @default("{\"last_seen\":\"contacts\",\"profile_photo\":\"everyone\"}")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  contacts  Contact[]     @relation("ContactOwner")
+  contactOf Contact[]     @relation("ContactTarget")
+  blocking  BlockedUser[] @relation("Blocker")
+  blockedBy BlockedUser[] @relation("Blocked")
+
+  @@map("users")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  ownerId   String   @map("owner_id")
+  contactId String   @map("contact_id")
+  nickname  String?  @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  owner   User @relation("ContactOwner", fields: [ownerId], references: [id])
+  contact User @relation("ContactTarget", fields: [contactId], references: [id])
+
+  @@unique([ownerId, contactId])
+  @@map("contacts")
+}
+
+model BlockedUser {
+  blockerId String   @map("blocker_id")
+  blockedId String   @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id])
+  blocked User @relation("Blocked", fields: [blockedId], references: [id])
+
+  @@id([blockerId, blockedId])
+  @@map("blocked_users")
+}
+
+model Conversation {
+  id            String    @id @default(uuid())
+  type          String    @db.VarChar(20)
+  createdBy     String    @map("created_by")
+  lastMessageAt DateTime? @map("last_message_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  participants ConversationParticipant[]
+  group        Group?
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String    @map("conversation_id")
+  userId         String    @map("user_id")
+  role           String    @default("member") @db.VarChar(20)
+  isMuted        Boolean   @default(false) @map("is_muted")
+  isPinned       Boolean   @default(false) @map("is_pinned")
+  isArchived     Boolean   @default(false) @map("is_archived")
+  lastReadAt     DateTime? @map("last_read_at")
+  joinedAt       DateTime  @default(now()) @map("joined_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String    @default(uuid())
+  conversationId String    @map("conversation_id")
+  senderId       String    @map("sender_id")
+  content        String?   @db.Text
+  contentIv      String?   @map("content_iv") @db.Text
+  type           String    @db.VarChar(30)
+  replyToId      String?   @map("reply_to_id")
+  isDeleted      Boolean   @default(false) @map("is_deleted")
+  deletedFor     Json      @default("[]") @map("deleted_for")
+  editedAt       DateTime? @map("edited_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@id([id, createdAt])
+  @@index([conversationId])
+  @@map("messages")
+}
+
+model MessageStatus {
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  status    String   @db.VarChar(20)
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@id([messageId, userId])
+  @@map("message_status")
+}
+
+model Reaction {
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  emoji     String   @db.VarChar(10)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@id([messageId, userId])
+  @@map("reactions")
+}
+
+model Group {
+  id             String   @id @default(uuid())
+  conversationId String   @unique @map("conversation_id")
+  name           String   @db.VarChar(100)
+  description    String?  @db.Text
+  avatarUrl      String?  @map("avatar_url") @db.Text
+  inviteLink     String?  @unique @map("invite_link") @db.VarChar(100)
+  maxMembers     Int      @default(1024) @map("max_members")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("groups")
+}

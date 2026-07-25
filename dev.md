@@ -1,49 +1,42 @@
-Phase 1
-Auth Service
-MySQL
-Prisma
-JWT
-Phase 2
+# Local development
 
-Add:
+## Backend (`services/server`)
 
-Redis
-Refresh Tokens
-Sessions
-Rate Limiting
-Phase 3
+All HTTP and Socket.IO traffic uses one app (default **port 8000**).
 
-Add:
+| Area | Path |
+|------|------|
+| Health | `GET /api/v1/health` |
+| Auth | `/api/v1/auth/*` |
+| Users & profile | `/api/v1/users/*` |
+| Contacts | `/api/v1/contacts/*` |
+| Blocks | `/api/v1/blocks/*` |
+| Realtime | Socket.IO at `/socket.io` (JWT in `auth.token`) |
 
-Multi-device login
-Device tracking
-OAuth
-MFA
-RBAC
-Auth Service
-│
-├── Register User
-├── Login
-├── JWT
-└── Refresh Token
+### Setup
 
-User Service
-│
-├── Profile
-├── Contacts
-├── Presence
-├── Last Seen
-├── Privacy
-└── Block Users
+```bash
+cd services/server
+cp .env.example .env
+npm install
+npm run db:generate
+npm run db:push
+```
 
-Chat Service
-│
-├── Direct Chats
-├── Groups
-└── Participants
+### Run
 
-Message Service
-│
-├── Messages
-├── Reactions
-└── Read Receipts
+From repo root:
+
+```bash
+npm run dev
+```
+
+Starts **server** + **web** (`NEXT_PUBLIC_API_URL=http://localhost:8000`).
+
+Optional: `npm run desktop` for the Electron shell in `app/desktop`.
+
+```bash
+cd services/server
+npm run test:socket
+npm run test:smtp
+```

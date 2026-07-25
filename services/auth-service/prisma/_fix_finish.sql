@@ -1,2 +1,0 @@
-DELETE FROM `otps`;
-ALTER TABLE `otps` ADD CONSTRAINT `otps_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `auth-user`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

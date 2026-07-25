@@ -11,3 +11,6 @@ node_modules
 .DS_Store
 .next
 .turbo
+
+# Orphan after monolith merge (safe to delete locally)
+services/chat-service/
