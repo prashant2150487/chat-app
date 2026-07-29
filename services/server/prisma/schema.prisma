@@ -95,13 +95,14 @@ model BlockedUser {
 
 model Conversation {
   id            String    @id @default(uuid())
-  type          String    @db.VarChar(20)
+  type          String    @db.VarChar(20) // direct | group
   createdBy     String    @map("created_by")
   lastMessageAt DateTime? @map("last_message_at")
   createdAt     DateTime  @default(now()) @map("created_at")
 
   participants ConversationParticipant[]
   group        Group?
+  calls        Call[]
 
   @@map("conversations")
 }
@@ -109,7 +110,7 @@ model Conversation {
 model ConversationParticipant {
   conversationId String    @map("conversation_id")
   userId         String    @map("user_id")
-  role           String    @default("member") @db.VarChar(20)
+  role           String    @default("member") @db.VarChar(20) // admin | member
   isMuted        Boolean   @default(false) @map("is_muted")
   isPinned       Boolean   @default(false) @map("is_pinned")
   isArchived     Boolean   @default(false) @map("is_archived")
@@ -122,16 +123,18 @@ model ConversationParticipant {
   @@map("conversation_participants")
 }
 
+// MySQL: table is RANGE-partitioned on created_at in SQL migrations.
+// No FK from messages -> conversations (MySQL disallows FKs on partitioned tables).
 model Message {
   id             String    @default(uuid())
   conversationId String    @map("conversation_id")
   senderId       String    @map("sender_id")
   content        String?   @db.Text
   contentIv      String?   @map("content_iv") @db.Text
-  type           String    @db.VarChar(30)
+  type           String    @db.VarChar(30) // text|image|video|audio|doc|location
   replyToId      String?   @map("reply_to_id")
   isDeleted      Boolean   @default(false) @map("is_deleted")
-  deletedFor     Json      @default("[]") @map("deleted_for")
+  deletedFor     Json      @default("[]") @map("deleted_for") // per-user deletes (UUID list)
   editedAt       DateTime? @map("edited_at")
   createdAt      DateTime  @default(now()) @map("created_at")
 
@@ -143,8 +146,8 @@ model Message {
 model MessageStatus {
   messageId String   @map("message_id")
   userId    String   @map("user_id")
-  status    String   @db.VarChar(20)
-  updatedAt DateTime @default(now()) @map("updated_at")
+  status    String   @db.VarChar(20) // sent | delivered | read
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@id([messageId, userId])
   @@map("message_status")
@@ -174,4 +177,55 @@ model Group {
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@map("groups")
+}
+
+model MediaFile {
+  id             String   @id @default(uuid())
+  uploaderId     String   @map("uploader_id")
+  originalName   String   @map("original_name") @db.Text
+  mimeType       String   @map("mime_type") @db.VarChar(100)
+  fileSize       BigInt   @map("file_size")
+  s3Key          String   @unique @map("s3_key") @db.VarChar(512)
+  cdnUrl         String?  @map("cdn_url") @db.Text
+  thumbnailUrl   String?  @map("thumbnail_url") @db.Text
+  width          Int?
+  height         Int?
+  durationSecs   Int?     @map("duration_secs")
+  isE2eEncrypted Boolean  @default(false) @map("is_e2e_encrypted")
+  scanStatus     String   @default("pending") @map("scan_status") @db.VarChar(20) // pending|clean|infected
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([uploaderId])
+  @@map("media_files")
+}
+
+model Call {
+  id             String    @id @default(uuid())
+  conversationId String    @map("conversation_id")
+  callerId       String    @map("caller_id")
+  type           String    @db.VarChar(10) // audio | video
+  status         String    @db.VarChar(20) // ringing|active|missed|ended|declined
+  startedAt      DateTime? @map("started_at")
+  endedAt        DateTime? @map("ended_at")
+  durationSecs   Int?      @map("duration_secs")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  conversation Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  participants CallParticipant[]
+
+  @@index([conversationId])
+  @@index([callerId])
+  @@map("calls")
+}
+
+model CallParticipant {
+  callId   String    @map("call_id")
+  userId   String    @map("user_id")
+  joinedAt DateTime? @map("joined_at")
+  leftAt   DateTime? @map("left_at")
+
+  call Call @relation(fields: [callId], references: [id], onDelete: Cascade)
+
+  @@id([callId, userId])
+  @@map("call_participants")
 }

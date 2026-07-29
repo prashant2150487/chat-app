@@ -17,6 +17,11 @@ function smtpPassword(value) {
   return pass ? pass.replace(/\s/g, "") : undefined;
 }
 
+function parseBool(value, defaultValue = false) {
+  if (value == null || value === "") return defaultValue;
+  return String(value).trim().toLowerCase() === "true";
+}
+
 export const ENV = {
   PORT: Number(process.env.PORT) || 8000,
   DATABASE_URL: clean(process.env.DATABASE_URL),
@@ -26,11 +31,11 @@ export const ENV = {
   JWT_EXPIRES_IN: clean(process.env.JWT_EXPIRES_IN),
   JWT_REFRESH_EXPIRES_IN: clean(process.env.JWT_REFRESH_EXPIRES_IN),
   INTERNAL_SERVICE_SECRET: clean(process.env.INTERNAL_SERVICE_SECRET),
+  MAIL_PROVIDER: clean(process.env.MAIL_PROVIDER) || "smtp",
   SMTP_HOST: clean(process.env.SMTP_HOST),
   SMTP_PORT: Number(clean(process.env.SMTP_PORT)) || 587,
+  SMTP_SECURE: parseBool(process.env.SMTP_SECURE, false),
   SMTP_USER: clean(process.env.SMTP_USER),
   SMTP_PASS: smtpPassword(process.env.SMTP_PASS),
   SMTP_FROM: clean(process.env.SMTP_FROM),
-  SMTP_SECURE:
-    String(process.env.SMTP_SECURE || "").toLowerCase() === "true",
 };
