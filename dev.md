@@ -40,3 +40,7 @@ cd services/server
 npm run test:socket
 npm run test:smtp
 ```
+
+## Chat (plan)
+
+See [docs/chat-architecture.md](./docs/chat-architecture.md) for REST + WebSocket design, events, and implementation order.
