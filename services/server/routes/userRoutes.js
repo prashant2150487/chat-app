@@ -14,4 +14,5 @@ router.patch("/me", authenticate, updateMe);
 router.get("/username/:username", authenticate, getUserByUserName);
 router.get("/:id", authenticate, getUserById);
 
+
 export default router;

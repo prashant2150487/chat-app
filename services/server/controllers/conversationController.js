@@ -1,13 +1,16 @@
+import { HTTP_STATUS } from "../constants/httpStatus.js";
+import { conversationService } from "../services/conversationService.js";
+import { AppError } from "../utils/appError.js";
 
 
 
 
 
 
-export const listConverstions = async (req, res, next) => {
+export const getAllConversation = async (req, res, next) => {
     try {
         const { id } = req.user;
-        const data = await conversationService.listForUser(req.user.id);
+        const data = await conversationService.getAllConversationsForUser(id);
         return res.status(HTTP_STATUS.OK).json({
             success: true,
             data,
@@ -17,26 +20,24 @@ export const listConverstions = async (req, res, next) => {
         next(err)
     }
 }
-
-export const createDirectConversation = async (req, res, next) => {
+export const getConversationById = async (req, res, next) => {
     try {
-        const { id } = req.user;
-        const { peerUserId } = req.body;
-        const data = await conversationService.getOrCreateDirect(id, peerUserId)
+        const { id } = req.params;
+        const { id: userId } = req.user;
+        if (!id) {
+            throw new AppError("Please provide conversation id")
+        }
+        if (!userId) {
+            throw new AppError("Please provide user id")
+        }
+        const { conversation } = await conversationService.getConversationById(id, userId);
         return res.status(HTTP_STATUS.OK).json({
             success: true,
-            data,
-            message: "Direct conversation created successfully",
+            data: conversation,
+            message: "Conversation fetched successfully",
         });
     } catch (err) {
         next(err)
     }
 }
-export const getConversation = async (req,res,next) =>{
-    try{
-        
 
-    }catch(err){
-
-    }
-}
