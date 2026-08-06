@@ -1,11 +1,12 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/authMiddleware.js";
-import { getAllConversation, getConversationById } from "../controllers/conversationController.js";
+import { createConversation, getAllConversation, getConversationById } from "../controllers/conversationController.js";
 
 
 
 const router = Router()
 router.get("/", authenticate, getAllConversation)
+router.post("/", authenticate, createConversation)
 router.get("/:id", authenticate, getConversationById)
 // router.delete("/:id", authenticate, deleteConversation)
 // router.put("/:id/mute", authenticate, muteConversation);

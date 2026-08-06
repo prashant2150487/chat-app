@@ -12,6 +12,8 @@ export const registerConnectionHandlers = (io, socket) => {
     socket.broadcast.emit(SOCKET_EVENTS.USER_ONLINE, { userId });
   }
 
+  socket.emit("welcome", { message: "Connected to websocket server!" });
+
   console.log(`Socket connected: user=${userId} socket=${socket.id}`);
 
   socket.on(SOCKET_EVENTS.DISCONNECT, () => {
