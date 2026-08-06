@@ -164,3 +164,31 @@ export const getMeService = async (userId) => {
   }
   return toPublicAuthUser(user);
 };
+
+export const refreshTokenService = async (incomingRefreshToken) => {
+  // We can decode and verify if it's expired
+  // But we also need to check if it matches what's in DB
+  const user = await prisma.authUser.findFirst({
+    where: { refreshToken: incomingRefreshToken },
+  });
+
+  if (!user) {
+    throw new AppError("Invalid refresh token", HTTP_STATUS.UNAUTHORIZED);
+  }
+
+  // Optionally verify jwt validity if generating with expiry
+  // For simplicity, just issuing new tokens based on DB presence
+  const tokenPayload = { email: user.email, id: user.id, role: user.role };
+  const token = generateToken(tokenPayload);
+  const refreshToken = generateRefreshToken(tokenPayload);
+
+  await prisma.authUser.update({
+    where: { id: user.id },
+    data: {
+      token,
+      refreshToken,
+    },
+  });
+
+  return { token, refreshToken };
+};
