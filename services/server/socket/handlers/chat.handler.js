@@ -5,6 +5,7 @@ import {
   joinConversationRoom,
   leaveConversationRoom,
 } from "../rooms/room.manager.js";
+import { prisma } from "../../config/database.js";
 
 export const registerChatHandlers = (io, socket) => {
   const userId = socket.data.user.id;
@@ -27,21 +28,23 @@ export const registerChatHandlers = (io, socket) => {
 
   socket.on(
     SOCKET_EVENTS.MESSAGE_SEND,
-    ({ conversationId, content, type = "text", replyToId }) => {
+    async ({ conversationId, content, type = "text", replyToId }) => {
       if (!conversationId || !content?.trim()) {
         socket.emit("error", { message: "conversationId and content required" });
         return;
       }
-
-      const message = {
-        id: randomUUID(),
-        conversationId,
-        senderId: userId,
-        content: content.trim(),
-        type,
-        replyToId: replyToId ?? null,
-        createdAt: new Date().toISOString(),
-      };
+      // save to db
+      const message = await prisma.message.create({
+        data: {
+          id: randomUUID(),
+          conversationId,
+          senderId: userId,
+          content: content.trim(),
+          type,
+          replyToId: replyToId ?? null,
+          createdAt: new Date().toISOString(),
+        }
+      })
 
       io.to(conversationRoom(conversationId)).emit(
         SOCKET_EVENTS.MESSAGE_RECEIVE,
