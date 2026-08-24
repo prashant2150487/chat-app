@@ -1,24 +1,29 @@
-import { randomUUID } from "crypto";
 import { SOCKET_EVENTS } from "../../constants/socketEvents.js";
+import { MESSAGE_STATUS, messageService } from "../../services/messageService.js";
 import {
   conversationRoom,
   joinConversationRoom,
   leaveConversationRoom,
 } from "../rooms/room.manager.js";
-import { prisma } from "../../config/database.js";
 
 export const registerChatHandlers = (io, socket) => {
   const userId = socket.data.user.id;
 
-  socket.on(SOCKET_EVENTS.CONVERSATION_JOIN, ({ conversationId }) => {
+  socket.on(SOCKET_EVENTS.CONVERSATION_JOIN, async ({ conversationId }) => {
     if (!conversationId) {
       socket.emit("error", { message: "conversationId is required" });
       return;
     }
 
-    // TODO: verify user is a participant via conversation_participants
-    joinConversationRoom(socket, conversationId);
-    console.log(`User ${userId} joined conversation ${conversationId}`);
+    try {
+      await messageService.assertParticipant(conversationId, userId);
+      joinConversationRoom(socket, conversationId);
+      console.log(`User ${userId} joined conversation ${conversationId}`);
+    } catch (err) {
+      socket.emit("error", {
+        message: err.message || "Failed to join conversation",
+      });
+    }
   });
 
   socket.on(SOCKET_EVENTS.CONVERSATION_LEAVE, ({ conversationId }) => {
@@ -33,23 +38,41 @@ export const registerChatHandlers = (io, socket) => {
         socket.emit("error", { message: "conversationId and content required" });
         return;
       }
-      // save to db
-      const message = await prisma.message.create({
-        data: {
-          id: randomUUID(),
+
+      try {
+        const { message, statuses } = await messageService.createMessage({
           conversationId,
           senderId: userId,
-          content: content.trim(),
+          content,
           type,
-          replyToId: replyToId ?? null,
-          createdAt: new Date().toISOString(),
-        }
-      })
+          replyToId,
+          io,
+        });
 
-      io.to(conversationRoom(conversationId)).emit(
-        SOCKET_EVENTS.MESSAGE_RECEIVE,
-        message,
-      );
+        io.to(conversationRoom(conversationId)).emit(
+          SOCKET_EVENTS.MESSAGE_RECEIVE,
+          { ...message, statuses },
+        );
+
+        for (const row of statuses) {
+          if (row.status === MESSAGE_STATUS.DELIVERED) {
+            io.to(conversationRoom(conversationId)).emit(
+              SOCKET_EVENTS.MESSAGE_DELIVERED,
+              {
+                conversationId,
+                messageId: row.messageId,
+                userId: row.userId,
+                status: row.status,
+                updatedAt: row.updatedAt,
+              },
+            );
+          }
+        }
+      } catch (err) {
+        socket.emit("error", {
+          message: err.message || "Failed to send message",
+        });
+      }
     },
   );
 
@@ -71,14 +94,28 @@ export const registerChatHandlers = (io, socket) => {
 
   socket.on(
     SOCKET_EVENTS.MESSAGE_READ,
-    ({ conversationId, messageId }) => {
+    async ({ conversationId, messageId }) => {
       if (!conversationId || !messageId) return;
-      io.to(conversationRoom(conversationId)).emit(SOCKET_EVENTS.MESSAGE_READ, {
-        conversationId,
-        messageId,
-        userId,
-        readAt: new Date().toISOString(),
-      });
+
+      try {
+        const payload = await messageService.markMessageRead({
+          messageId,
+          conversationId,
+          userId,
+        });
+
+        io.to(conversationRoom(conversationId)).emit(
+          SOCKET_EVENTS.MESSAGE_READ,
+          {
+            ...payload,
+            readAt: payload.readAt.toISOString(),
+          },
+        );
+      } catch (err) {
+        socket.emit("error", {
+          message: err.message || "Failed to mark message as read",
+        });
+      }
     },
   );
 };

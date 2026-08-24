@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv"
-dotenv.config();
+import { ENV } from "../config/env.js";
 
 
 
@@ -10,7 +10,7 @@ export const generateToken = (payload) => {
     payload,
     process.env.JWT_ACCESS_SECRET,
     {
-      expiresIn: process.env.JWT_EXPIRES_IN || "15m"
+      expiresIn: ENV.JWT_EXPIRES_IN || "1d"
     }
   );
 };
@@ -20,19 +20,19 @@ export const generateRefreshToken = (payload) => {
     payload,
     process.env.JWT_REFRESH_SECRET,
     {
-      expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || "7d",
+      expiresIn: ENV.JWT_REFRESH_EXPIRES_IN || "7d",
     },
   )
 }
 
 
 export const verifyToken = (token) => {
-  return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+  return jwt.verify(token, ENV.JWT_ACCESS_SECRET);
 };
 
 export const verifyAccessToken = verifyToken;
 
 export const verifyRefreshToken = (token) => {
-  return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+  return jwt.verify(token, ENV.JWT_REFRESH_SECRET);
 };
 
